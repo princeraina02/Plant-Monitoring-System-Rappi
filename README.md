@@ -102,18 +102,6 @@ Connect the components to your Raspberry Pi as follows:
 - Connect water pump to relay output and external power supply
 
 
-### Wiring Diagram
-
-```plaintext
-Raspberry Pi      DHT11      Soil Moisture      Relay (Pump)
------------      -----      -------------      ------------
-5V      -------- VCC        VCC                VCC
-GND     -------- GND        GND                GND
-GPIO16  -------- DATA
-GPIO26  ---------------------- D0
-GPIO6   ------------------------------------ IN
-```
-
 ## Configuration
 
 ### 1. Create project structure
