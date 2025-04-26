@@ -3,25 +3,6 @@
 A comprehensive Raspberry Pi-based system for monitoring and automating plant care. This project uses sensors to track temperature, humidity, and soil moisture, automatically controlling a water pump based on soil conditions.
 
 
-
-
-
-## Table of Contents
-
-- [Features](#features)
-- [Hardware Requirements](#hardware-requirements)
-- [Software Requirements](#software-requirements)
-- [Installation](#installation)
-- [Hardware Setup](#hardware-setup)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Web Interface](#web-interface)
-- [Database](#database)
-- [Troubleshooting](#troubleshooting)
-- [Future Enhancements](#future-enhancements)
-- [License](#license)
-
-
 ## Features
 
 - Real-time monitoring of:
