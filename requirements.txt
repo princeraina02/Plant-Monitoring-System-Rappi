@@ -1,0 +1,4 @@
+RPi.GPIO==0.7.1
+adafruit-circuitpython-dht==3.7.8
+Flask==2.3.3
+Flask-SocketIO==5.3.4

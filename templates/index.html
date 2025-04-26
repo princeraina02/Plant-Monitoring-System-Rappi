@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Monitoring System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --accent: #9b59b6;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #2ecc71;
+            --background: #f8f9fa;
+            --card: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --border: #dfe6e9;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.07), 0 5px 10px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 2.2rem;
+            position: relative;
+        }
+
+        .header p {
+            margin-top: 10px;
+            opacity: 0.9;
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--primary);
+        }
+
+        .temperature .card-icon {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+
+        .humidity .card-icon {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--info);
+        }
+
+        .soil .card-icon {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+
+        .pump .card-icon {
+            background-color: rgba(155, 89, 182, 0.1);
+            color: var(--accent);
+        }
+
+        .value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+            color: var(--text);
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .unit {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 400;
+            margin-top: 5px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status.on {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+        }
+
+        .status.off {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+        }
+
+        .status.dry {
+            background-color: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+        }
+
+        .status.wet {
+            background-color: rgba(52, 152, 219, 0.15);
+            color: var(--info);
+        }
+
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(46, 204, 113, 0.3);
+        }
+
+        .nav-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.4);
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-bottom: 25px;
+            font-style: italic;
+            color: var(--text-light);
+            background-color: var(--card);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--card);
+            color: var(--text);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .footer p {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .footer small {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-light);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .value.updated {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        .status.updated {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .value {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Lucide icon styles */
+        .lucide {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Plant Monitoring System</h1>
+            <p>Real-time monitoring for your plants' health and environment</p>
+        </div>
+        
+        <a href="/visualization" class="nav-button">
+            <i data-lucide="bar-chart-2"></i>
+            View Historical Data
+        </a>
+        
+        <div class="timestamp" id="timestamp">
+            <i data-lucide="clock"></i>
+            Last updated: --
+        </div>
+        
+        <div class="dashboard">
+            <div class="card temperature">
+                <div class="card-icon">
+                    <i data-lucide="thermometer"></i>
+                </div>
+                <h2>Temperature</h2>
+                <div class="value" id="temperature">--</div>
+                <div class="unit">°C</div>
+            </div>
+            
+            <div class="card humidity">
+                <div class="card-icon">
+                    <i data-lucide="droplets"></i>
+                </div>
+                <h2>Humidity</h2>
+                <div class="value" id="humidity">--</div>
+                <div class="unit">%</div>
+            </div>
+            
+            <div class="card soil">
+                <div class="card-icon">
+                    <i data-lucide="flower"></i>
+                </div>
+                <h2>Soil Moisture</h2>
+                <div class="status" id="soil-moisture">--</div>
+            </div>
+            
+            <div class="card pump">
+                <div class="card-icon">
+                    <i data-lucide="droplet"></i>
+                </div>
+                <h2>Pump Status</h2>
+                <div class="status" id="pump-status">--</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Plant Monitoring System - Raspberry Pi Project</p>
+            <small>Monitoring your plants with precision and care</small>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Store previous values to detect changes
+        let prevData = {};
+        
+        // Function to fetch current sensor data
+        function fetchData() {
+            fetch('/api/current')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        // Update timestamp
+                        document.getElementById('timestamp').innerHTML = `
+                            <i data-lucide="clock"></i>
+                            Last updated: ${data.timestamp}
+                        `;
+                        lucide.createIcons();
+                        
+                        // Update temperature with animation if changed
+                        if (data.temperature !== null) {
+                            const tempElement = document.getElementById('temperature');
+                            tempElement.textContent = data.temperature;
+                            
+                            if (prevData.temperature !== data.temperature) {
+                                tempElement.classList.remove('updated');
+                                void tempElement.offsetWidth; // Trigger reflow
+                                tempElement.classList.add('updated');
+                            }
+                        } else {
+                            document.getElementById('temperature').textContent = 'Error';
+                        }
+                        
+                        // Update humidity with animation if changed
+                        if (data.humidity !== null) {
+                            const humidityElement = document.getElementById('humidity');
+                            humidityElement.textContent = data.humidity;
+                            
+                            if (prevData.humidity !== data.humidity) {
+                                humidityElement.classList.remove('updated');
+                                void humidityElement.offsetWidth; // Trigger reflow
+                                humidityElement.classList.add('updated');
+                            }
+                        } else {
+                            document.getElementById('humidity').textContent = 'Error';
+                        }
+                        
+                        // Update soil moisture with animation if changed
+                        const soilElement = document.getElementById('soil-moisture');
+                        let newSoilContent, newSoilClass;
+                        
+                        if (data.soil_moisture === 1) {
+                            newSoilContent = '<i data-lucide="alert-triangle"></i> DRY';
+                            newSoilClass = 'status dry';
+                        } else {
+                            newSoilContent = '<i data-lucide="check-circle"></i> WET';
+                            newSoilClass = 'status wet';
+                        }
+                        
+                        if (prevData.soil_moisture !== data.soil_moisture) {
+                            soilElement.classList.remove('updated');
+                            void soilElement.offsetWidth; // Trigger reflow
+                            soilElement.innerHTML = newSoilContent;
+                            soilElement.className = newSoilClass + ' updated';
+                        } else {
+                            soilElement.innerHTML = newSoilContent;
+                            soilElement.className = newSoilClass;
+                        }
+                        
+                        // Update pump status with animation if changed
+                        const pumpElement = document.getElementById('pump-status');
+                        let newPumpContent, newPumpClass;
+                        
+                        if (data.motor_status === 'ON') {
+                            newPumpContent = '<i data-lucide="play"></i> ON';
+                            newPumpClass = 'status on';
+                        } else {
+                            newPumpContent = '<i data-lucide="pause"></i> OFF';
+                            newPumpClass = 'status off';
+                        }
+                        
+                        if (prevData.motor_status !== data.motor_status) {
+                            pumpElement.classList.remove('updated');
+                            void pumpElement.offsetWidth; // Trigger reflow
+                            pumpElement.innerHTML = newPumpContent;
+                            pumpElement.className = newPumpClass + ' updated';
+                        } else {
+                            pumpElement.innerHTML = newPumpContent;
+                            pumpElement.className = newPumpClass;
+                        }
+                        
+                        // Update Lucide icons
+                        lucide.createIcons();
+                        
+                        // Store current data for next comparison
+                        prevData = {...data};
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+        
+        // Fetch data immediately and then every 5 seconds
+        fetchData();
+        setInterval(fetchData, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Monitoring - Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --secondary-color: #27ae60;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 32px;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 32px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .nav-button {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .nav-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .time-selector {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .time-button {
+            background-color: #edf2f7;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .time-button:hover {
+            background-color: #e2e8f0;
+        }
+
+        .time-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .chart-container {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: transform 0.2s ease;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-4px);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding: 16px;
+            background: linear-gradient(135deg, #2d3748, #1a202c);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Chart.js customizations */
+        canvas {
+            border-radius: 8px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .time-button {
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Plant Monitoring Data Visualization</h1>
+        </div>
+        
+        <a href="/" class="nav-button">Back to Dashboard</a>
+        
+        <div class="time-selector">
+            <button class="time-button active" data-hours="6">6 Hours</button>
+            <button class="time-button" data-hours="12">12 Hours</button>
+            <button class="time-button" data-hours="24">24 Hours</button>
+            <button class="time-button" data-hours="48">2 Days</button>
+            <button class="time-button" data-hours="168">1 Week</button>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="temperatureChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="humidityChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="soilMoistureChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="pumpStatusChart"></canvas>
+        </div>
+        
+        <div class="footer">
+            <p>Plant Monitoring System - Raspberry Pi Project</p>
+        </div>
+    </div>
+
+    <script>
+        // Chart objects
+        let temperatureChart, humidityChart, soilMoistureChart, pumpStatusChart;
+        let currentHours = 6; // Default time range
+        
+        // Initialize charts
+        function initCharts() {
+            // Temperature chart
+            const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+            temperatureChart = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: [],
+                        borderColor: '#e53e3e',
+                        backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Temperature Over Time',
+                            font: { size: 18, weight: '600' },
+                            padding: { top: 10, bottom: 20 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2d3748',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 12 },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: '#edf2f7' },
+                            title: { display: true, text: '°C', font: { size: 14 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            title: { display: true, text: 'Time', font: { size: 14 } }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Humidity chart
+            const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+            humidityChart = new Chart(humidityCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Humidity (%)',
+                        data: [],
+                        borderColor: '#3182ce',
+                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Humidity Over Time',
+                            font: { size: 18, weight: '600' },
+                            padding: { top: 10, bottom: 20 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2d3748',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 12 },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            max: 100,
+                            grid: { color: '#edf2f7' },
+                            title: { display: true, text: '%', font: { size: 14 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            title: { display: true, text: 'Time', font: { size: 14 } }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Soil moisture chart
+            const soilCtx = document.getElementById('soilMoistureChart').getContext('2d');
+            soilMoistureChart = new Chart(soilCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Soil Moisture (Dry = 1, Wet = 0)',
+                        data: [],
+                        borderColor: '#38b2ac',
+                        backgroundColor: 'rgba(56, 178, 172, 0.1)',
+                        fill: true,
+                        stepped: true,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Soil Moisture Over Time',
+                            font: { size: 18, weight: '600' },
+                            padding: { top: 10, bottom: 20 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2d3748',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 12 },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: -0.1,
+                            max: 1.1,
+                            grid: { color: '#edf2f7' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 0) return 'Wet';
+                                    if (value === 1) return 'Dry';
+                                    return '';
+                                }
+                            },
+                            title: { display: true, text: 'Status', font: { size: 14 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            title: { display: true, text: 'Time', font: { size: 14 } }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Pump status chart
+            const pumpCtx = document.getElementById('pumpStatusChart').getContext('2d');
+            pumpStatusChart = new Chart(pumpCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Pump Status (ON = 1, OFF = 0)',
+                        data: [],
+                        borderColor: '#805ad5',
+                        backgroundColor: 'rgba(128, 90, 213, 0.1)',
+                        fill: true,
+                        stepped: true,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Pump Status Over Time',
+                            font: { size: 18, weight: '600' },
+                            padding: { top: 10, bottom: 20 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2d3748',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 12 },
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: -0.1,
+                            max: 1.1,
+                            grid: { color: '#edf2f7' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 0) return 'OFF';
+                                    if (value === 1) return 'ON';
+                                    return '';
+                                }
+                            },
+                            title: { display: true, text: 'Status', font: { size: 14 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            title: { display: true, text: 'Time', font: { size: 14 } }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        // Fetch historical data and update charts
+        function fetchHistoricalData(hours) {
+            fetch(`/api/history/${hours}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        // Extract data for charts
+                        const timestamps = data.map(item => {
+                            const date = new Date(item.timestamp);
+                            return date.toLocaleTimeString();
+                        });
+                        
+                        const temperatures = data.map(item => item.temperature);
+                        const humidities = data.map(item => item.humidity);
+                        const soilMoistures = data.map(item => item.soil_moisture);
+                        const pumpStatuses = data.map(item => item.motor_status === 'ON' ? 1 : 0);
+                        
+                        // Update temperature chart
+                        temperatureChart.data.labels = timestamps;
+                        temperatureChart.data.datasets[0].data = temperatures;
+                        temperatureChart.update();
+                        
+                        // Update humidity chart
+                        humidityChart.data.labels = timestamps;
+                        humidityChart.data.datasets[0].data = humidities;
+                        humidityChart.update();
+                        
+                        // Update soil moisture chart
+                        soilMoistureChart.data.labels = timestamps;
+                        soilMoistureChart.data.datasets[0].data = soilMoistures;
+                        soilMoistureChart.update();
+                        
+                        // Update pump status chart
+                        pumpStatusChart.data.labels = timestamps;
+                        pumpStatusChart.data.datasets[0].data = pumpStatuses;
+                        pumpStatusChart.update();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching historical data:', error);
+                });
+        }
+        
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            fetchHistoricalData(currentHours);
+            
+            // Set up time selector buttons
+            const timeButtons = document.querySelectorAll('.time-button');
+            timeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    timeButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Get hours from data attribute
+                    currentHours = parseInt(this.getAttribute('data-hours'));
+                    
+                    // Fetch data for selected time range
+                    fetchHistoricalData(currentHours);
+                });
+            });
+            
+            // Refresh data every 30 seconds
+            setInterval(() => {
+                fetchHistoricalData(currentHours);
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
