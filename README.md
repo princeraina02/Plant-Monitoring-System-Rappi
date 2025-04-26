@@ -55,39 +55,25 @@ sudo apt upgrade -y
 sudo apt install -y python3-pip python3-dev python3-venv libgpiod2
 ```
 
-### 3. Create project directory and set up virtual environment
+### 3. Clone the repository , set up virtual environment
 
 ```shellscript
 # Create project directory
-mkdir plant_monitoring
-cd plant_monitoring
+git clone https://github.com/princeraina02/Plant-Monitoring-System-Rappi
+cd Plant-Monitoring-System-Rappi
 
-# Create virtual environment
+# Create a virtual environment
 python3 -m venv venv
 
 # Activate virtual environment
 source venv/bin/activate
 ```
 
-### 4. Clone the repository or create project files
-
-```shellscript
-# Option 1: Clone from repository (if available)
-git clone https://github.com/yourusername/plant_monitoring.git .
-
-# Option 2: Create project files manually
-# Create the files as shown in the project structure
-```
-
-### 5. Install required Python packages
+### 4. Install required Python packages
 
 ```shellscript
 pip install RPi.GPIO adafruit-circuitpython-dht flask flask-socketio
-```
-
-Or use the requirements.txt file:
-
-```shellscript
+or
 pip install -r requirements.txt
 ```
 
